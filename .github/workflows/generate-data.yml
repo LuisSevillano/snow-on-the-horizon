@@ -2,31 +2,34 @@ name: Get images
 
 on:
   schedule:
-    - cron: "*/3 * * * *"
+    # GitHub suele ignorar intervalos menores a 5-10 minutos
+    - cron: "*/5 * * * *"
   push:
     branches:
       - main
+  workflow_dispatch: # Esto te permite ejecutarlo manualmente para probar
 
 jobs:
   generate-data:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Permiso explícito para poder hacer push
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Versión actualizada
 
       - name: Generate Data
         run: bash script.sh
 
-      - name: Commit files
+      - name: Commit and Push
         run: |
-          git config --local user.name actions-user
-          git config --local user.email "actions@github.com"
-          git add '*'
-          if [[ `git status --porcelain` ]]; then
-            echo "OK: Changes detected."
-            git commit -am "gh-action get images data: $(date)"
-            git push origin main
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "gh-action get images data: $(date)"
+            git push
           else
-          echo "No changes were detected."
+            echo "No changes were detected."
           fi
