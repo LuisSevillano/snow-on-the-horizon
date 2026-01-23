@@ -3,7 +3,7 @@ name: Get images
 on:
   schedule:
     # GitHub suele ignorar intervalos menores a 5-10 minutos
-    - cron: "*/5 * * * *"
+    - cron: "*/10 * * * *"
   push:
     branches:
       - main
